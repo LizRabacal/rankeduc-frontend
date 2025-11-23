@@ -39,6 +39,7 @@ export const ThemeSwitch: FC<ThemeSwitchProps> = ({
   });
 
   return (
+    //@ts-expect-error ignore typescript
     <Component
       {...getBaseProps({
         className: clsx(

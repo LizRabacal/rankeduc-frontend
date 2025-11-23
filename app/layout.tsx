@@ -9,9 +9,7 @@ import { siteConfig } from "@/config/site";
 import { fontSans } from "@/config/fonts";
 import { Navbar } from "@/components/navbar";
 import SimpleFooter from "@/components/footer";
-import { Boxes } from "@/components/ui/background-boxes";
-import { BackgroundBeamsWithCollision } from "@/components/ui/background-beams-with-collision";
-import { BackgroundGradientAnimation } from "@/components/ui/background-gradient-animation";
+
 
 export const metadata: Metadata = {
   title: {

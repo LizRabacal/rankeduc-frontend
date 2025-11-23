@@ -58,6 +58,7 @@ const LoaderEnviar = () => <div className="animate-spin rounded-full h-5 w-5 bor
 
 // --- Funções de Formatação ---
 const formatarPorcentagem = (valor: number): string => (valor * 100).toFixed(1) + "%";
+//@ts-expect-error ignore
 const formatarFloat = (valor: number | null): string => valor ? parseFloat(valor).toFixed(4) : "N/A";
 
 const getRankIcon = (rank: number) => {
@@ -333,6 +334,7 @@ export default function Home() {
                                 placeholder="Selecione o Estado (UF)"
                             >
                                 {siglasEstados.map((e) => (
+                                    //@ts-expect-error ignore
                                     <AutocompleteItem key={e} value={e}>{e}</AutocompleteItem>
                                 ))}
                             </Autocomplete>
@@ -348,6 +350,7 @@ export default function Home() {
                                 placeholder={loadingCidades ? "Carregando cidades..." : "Selecione o Município"}
                             >
                                 {cidades.map((c) => (
+                                    //@ts-expect-error ignore
                                     <AutocompleteItem key={c.codigo_ibge} value={c.codigo_ibge}>{c.nome}</AutocompleteItem>
                                 ))}
                             </Autocomplete>
@@ -363,6 +366,7 @@ export default function Home() {
                                 placeholder={!cidade ? "Selecione uma cidade primeiro" : loadingCursos ? "Buscando cursos..." : "Selecione o Curso"}
                             >
                                 {cursos.map((c) => (
+                                    //@ts-expect-error ignore
                                     <AutocompleteItem key={c} value={c}>{c}</AutocompleteItem>
                                 ))}
                             </Autocomplete>

@@ -221,7 +221,7 @@ export default function Home() {
         }
         setLoadingCursos(true);
         try {
-            const res = await axios.get<string[]>(`http://localhost:8000/cursos/${cidade}`);
+            const res = await axios.get<string[]>(`https://rankeduc-backend.onrender.com/cursos/${cidade}`);
             setCurso(null);
             setCursos(res.data);
             setResultado(null);
@@ -283,7 +283,7 @@ export default function Home() {
 
         try {
             // Endpoint da API de ranking
-            const res = await axios.post<ResultadoCompleto>(`http://localhost:8000/ranking/`, {
+            const res = await axios.post<ResultadoCompleto>(`https://rankeduc-backend.onrender.com/ranking/`, {
                 municipio_id: cidade,
                 curso_nome: curso
             });

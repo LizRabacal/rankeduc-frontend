@@ -1,7 +1,7 @@
 'use client';
 
 import api from "brasilapi-js";
-import { City } from "brasilapi-js/dist/types/ibge/city"; 
+import { City } from "brasilapi-js/dist/types/ibge/city";
 import axios from "axios";
 import { useEffect, useState } from "react";
 
@@ -10,27 +10,25 @@ import { Autocomplete, AutocompleteItem } from "@heroui/autocomplete";
 import { Form } from '@heroui/form';
 import { Button } from '@heroui/button';
 import { Divider } from "@heroui/divider";
-import { 
-    FaMedal, 
-    FaSearch, 
-    FaExclamationTriangle, 
-    FaTimesCircle, 
+import {
+    FaMedal,
+    FaSearch,
+    FaExclamationTriangle,
+    FaTimesCircle,
     FaChartBar,
     FaClock,
     FaLevelUpAlt,
     FaTachometerAlt // Para taxa de evasão/concorrência
-} from "react-icons/fa"; 
-import { IoIosSchool } from "react-icons/io"; 
+} from "react-icons/fa";
+import { IoIosSchool } from "react-icons/io";
 import { GiSplitCross } from "react-icons/gi"; // Ícone de evasão
 
-// NOVO: Importando o CardSpotlight
-import { CardSpotlight } from "@/components/ui/card-spotlight";
-import { m } from "framer-motion";
+import { CometCard } from "@/components/ui/comet-card";
+import { EncryptedText } from "@/components/ui/encrypted-text";
 
-// --- 0. Tipagem de Dados ---
 
 interface ResultadoItem {
-    id_ies: string; 
+    id_ies: string;
     nome_ies: string;
     nome_curso: string;
     score_qualidade: number;
@@ -55,7 +53,7 @@ interface ResultadoCompleto {
 }
 
 // --- 1. Mapeamento de Cores e Ícones ---
-const LoaderEnviar = () => <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>; 
+const LoaderEnviar = () => <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>;
 
 // --- Funções de Formatação ---
 const formatarPorcentagem = (valor: number): string => (valor * 100).toFixed(1) + "%";
@@ -88,7 +86,7 @@ const Metric: React.FC<MetricProps> = ({ icon, label, value, colorClass }) => (
         <span className={`text-xs font-semibold flex items-center ${colorClass}`}>
             {icon} {label}
         </span>
-        <span className="text-lg font-bold text-white mt-1">{value}</span>
+        <span className="text-lg font-bold dark:text-white text-zinc-900 mt-1">{value}</span>
     </div>
 );
 
@@ -113,83 +111,85 @@ const NoResults: React.FC<NoResultsProps> = ({ curso, mensagemErro }) => (
 );
 
 
-// --- 3. Componente de Ranking com CardSpotlight (NOVO) ---
-const RankingCardSpotlight: React.FC<{ ranking: ResultadoItem[]; cursoNome: string; cidadeNome: string }> = ({ ranking, cursoNome, cidadeNome }) => {
-    
+const RankingCard: React.FC<{ ranking: ResultadoItem[]; cursoNome: string; cidadeNome: string }> = ({ ranking, cursoNome, cidadeNome }) => {
+
     return (
         <div className="mt-12">
-            <h2 className="text-3xl font-extrabold text-gray-900 dark:text-white mb-6 text-center">
+            <h2 className="md:text-3xl text-2xl font-extrabold text-gray-900 dark:text-white mb-6 text-center">
                 🏆 Ranking Top IES - {cursoNome} em {cidadeNome}
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {ranking.map((item, index) => {
                     const rank = index + 1;
                     const icon = getRankIcon(rank);
-                    
+
                     return (
-                        <CardSpotlight 
-                            key={item.id_ies} 
-                            className="w-full h-auto p-6 transition-all duration-300"
+                        <CometCard
+                            key={item.id_ies}
                         >
-                            <div className="flex justify-between items-center relative z-20 mb-4">
-                                {icon}
-                                <span className="text-sm font-semibold text-neutral-300 bg-blue-600/70 px-3 py-1 rounded-full border border-blue-400">
-                                    {item.tipo_organizacao_administrativa}
-                                </span>
-                            </div>
-                            
-                            <h3 className="text-xl md:text-2xl font-bold relative z-20 text-white flex items-center">
-                                <IoIosSchool className="md:size-8 size-14 mr-2 text-blue-400" />
-                                {item.nome_ies}
-                            </h3>
-                            <p className="text-neutral-300 mt-1 relative z-20 text-sm italic">{item.nome_curso}</p>
-                            
-                            <Divider className="my-4 bg-white/20 relative z-20" />
+                            <div className="w-full h-auto p-6 transition-all duration-300"
+                            >
 
-                            {/* Detalhamento das Métricas */}
-                            <div className="relative z-20 grid grid-cols-2 gap-3 text-sm">
-                                <Metric
-                                    icon={<FaChartBar className="w-4 h-4 mr-1" />}
-                                    label="Score Qualidade"
-                                    value={formatarFloat(item.score_qualidade)}
-                                    colorClass="text-green-400"
-                                />
-                                <Metric
-                                    icon={<FaClock className="w-4 h-4 mr-1" />}
-                                    label="Taxa de Conclusão"
-                                    value={formatarPorcentagem(item.taxa_conclusao)}
-                                    colorClass="text-cyan-400"
-                                />
-                                <Metric
-                                    icon={<FaLevelUpAlt className="w-4 h-4 mr-1" />}
-                                    label="IGC Contínuo"
-                                    value={formatarFloat(item.igc_continuo)}
-                                    colorClass="text-purple-400"
-                                />
-                                <Metric
-                                    icon={<FaLevelUpAlt className="w-4 h-4 mr-1" />}
-                                    label="IDD Contínuo"
-                                    value={formatarFloat(item.idd_continuo)}
-                                    colorClass="text-pink-400"
-                                />
-                                <Metric
-                                    icon={<GiSplitCross className="w-4 h-4 mr-1" />}
-                                    label="Taxa de Evasão"
-                                    value={formatarPorcentagem(item.taxa_evasao)}
-                                    colorClass="text-red-400"
-                                />
-                                <Metric
-                                    icon={<FaTachometerAlt className="w-4 h-4 mr-1" />}
-                                    label="Concorrência (Candidatos)"
-                                    value={item.taxa_concorrencia ? item.taxa_concorrencia.toFixed(2) : "N/A"}
-                                    colorClass="text-yellow-400"
-                                />
-                            </div>
+                                <div className="flex justify-between items-center relative z-20 mb-4">
+                                    {icon}
+                                    <span className="text-sm font-semibold text-neutral-300 bg-blue-600/70 px-3 py-1 rounded-full border border-blue-400">
+                                        {item.tipo_organizacao_administrativa}
+                                    </span>
+                                </div>
 
-                            <p className="text-neutral-400 mt-4 relative z-20 text-xs text-right">
-                                Target Desempenho: {item.target_desempenho}
-                            </p>
-                        </CardSpotlight>
+                                <h3 className="text-xl md:text-2xl font-bold relative z-20 dark:text-white text-zinc-900 flex items-center">
+                                    <IoIosSchool className="md:size-8 size-14 mr-2 text-blue-400" />
+                                    {item.nome_ies}
+                                </h3>
+                                <p className="dark:text-neutral-300 text-zinc-900 mt-1 relative z-20 text-sm italic">{item.nome_curso}</p>
+
+                                <Divider className="my-4 bg-white/20 relative z-20" />
+
+                                {/* Detalhamento das Métricas */}
+                                <div className="relative z-20 grid grid-cols-2 gap-3 text-sm">
+                                    <Metric
+                                        icon={<FaChartBar className="w-4 h-4 mr-1" />}
+                                        label="Score Qualidade"
+                                        value={formatarFloat(item.score_qualidade)}
+                                        colorClass="text-green-400"
+                                    />
+                                    <Metric
+                                        icon={<FaClock className="w-4 h-4 mr-1" />}
+                                        label="Taxa de Conclusão"
+                                        value={formatarPorcentagem(item.taxa_conclusao)}
+                                        colorClass="text-cyan-400"
+                                    />
+                                    <Metric
+                                        icon={<FaLevelUpAlt className="w-4 h-4 mr-1" />}
+                                        label="IGC Contínuo"
+                                        value={formatarFloat(item.igc_continuo)}
+                                        colorClass="text-purple-400"
+                                    />
+                                    <Metric
+                                        icon={<FaLevelUpAlt className="w-4 h-4 mr-1" />}
+                                        label="IDD Contínuo"
+                                        value={formatarFloat(item.idd_continuo)}
+                                        colorClass="text-pink-400"
+                                    />
+                                    <Metric
+                                        icon={<GiSplitCross className="w-4 h-4 mr-1" />}
+                                        label="Taxa de Evasão"
+                                        value={formatarPorcentagem(item.taxa_evasao)}
+                                        colorClass="text-red-400"
+                                    />
+                                    <Metric
+                                        icon={<FaTachometerAlt className="w-4 h-4 mr-1" />}
+                                        label="Concorrência (Candidatos)"
+                                        value={item.taxa_concorrencia ? item.taxa_concorrencia.toFixed(2) : "N/A"}
+                                        colorClass="text-yellow-400"
+                                    />
+                                </div>
+
+                                <p className="text-neutral-400 mt-4 relative z-20 text-xs text-right">
+                                    Target Desempenho: {item.target_desempenho}
+                                </p>
+                            </div>
+                        </CometCard>
                     );
                 })}
             </div>
@@ -209,8 +209,8 @@ export default function Home() {
     const [loadingCidades, setLoadingCidades] = useState<boolean>(false);
     const [loadingCursos, setLoadingCursos] = useState<boolean>(false);
     const [loadingResultado, setLoadingResultado] = useState<boolean>(false);
-    
-    const [resultado, setResultado] = useState<ResultadoCompleto | { status: 'erro', mensagem: string } | null>(null); 
+
+    const [resultado, setResultado] = useState<ResultadoCompleto | { status: 'erro', mensagem: string } | null>(null);
     const [estado, setEstado] = useState<string>('BA');
 
     // Funções tipadas
@@ -230,9 +230,9 @@ export default function Home() {
             console.error("Erro ao buscar cursos:", err.message);
             setCursos([]);
             if (!err.response) {
-                 setResultado({ 
-                    status: 'erro', 
-                    mensagem: 'Erro de conexão com a API de Cursos. Verifique o servidor.' 
+                setResultado({
+                    status: 'erro',
+                    mensagem: 'Erro de conexão com a API de Cursos. Verifique o servidor.'
                 });
             }
         } finally {
@@ -243,7 +243,7 @@ export default function Home() {
     const getCidades = async (): Promise<void> => {
         setLoadingCidades(true);
         try {
-            const res = await api.ibge.city.getBy(estado) as { data: City[] }; 
+            const res = await api.ibge.city.getBy(estado) as { data: City[] };
             setCidade(null);
             setCidades(res.data);
             setResultado(null);
@@ -258,29 +258,29 @@ export default function Home() {
     // Effects (mantidos)
     useEffect(() => {
         getCursos();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [cidade]);
 
     useEffect(() => {
         getCidades();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [estado]);
 
     const siglasEstados: string[] = [
-        "AC", "AL", "AP", "AM", "BA", "CE", "ES", "GO", "MA", "MT", "MS", "MG", "PA", 
+        "AC", "AL", "AP", "AM", "BA", "CE", "ES", "GO", "MA", "MT", "MS", "MG", "PA",
         "PB", "PR", "PE", "PI", "RJ", "RN", "RS", "RO", "RR", "SC", "SP", "SE", "TO", "DF"
     ];
 
     const handleSubmit = async (e: React.FormEvent): Promise<void> => {
         e.preventDefault();
-        
+
         if (!cidade || !curso) {
             alert("Selecione uma cidade e um curso.");
             return;
         }
-        
+
         setLoadingResultado(true);
-        setResultado(null); 
+        setResultado(null);
 
         try {
             // Endpoint da API de ranking
@@ -298,8 +298,8 @@ export default function Home() {
                 // Erro HTTP (CORS, 404, 500)
                 mensagem = err.response.data?.mensagem || `Erro do servidor (${err.response.status}).`;
             }
-            setResultado({ 
-                status: 'erro', 
+            setResultado({
+                status: 'erro',
                 mensagem: mensagem
             });
         } finally {
@@ -309,28 +309,32 @@ export default function Home() {
 
     // Extração e Preparação dos Dados
     const rankingData: ResultadoItem[] = (resultado && 'ranking_top_ies' in resultado) ? resultado.ranking_top_ies : [];
-    
+
     const mensagemErro: string | null = (resultado && resultado.status === 'erro') ? resultado.mensagem : null;
     const nomeCidade = cidades.find(c => c.codigo_ibge === cidade)?.nome || 'Município Selecionado';
     const cursoNome = curso || 'Curso Selecionado';
 
     return (
         <div className="flex min-h-screen items-start justify-center bg-gray-50 dark:bg-gray-900 py-12 px-4 sm:px-6 lg:px-8 font-sans">
-            <div className="max-w-6xl w-full"> 
-                
+            <div className="max-w-6xl w-full">
+
                 {/* 1. Formulário de Configuração (TOPO) */}
                 <div className="w-full">
                     <Form onSubmit={handleSubmit} className="p-8 border border-zinc-200 dark:border-zinc-700 rounded-xl shadow-2xl bg-white dark:bg-zinc-800">
-                        <h1 className="text-xl md:text-3xl font-extrabold mb-6 text-center text-gray-900 dark:text-white">
-                            Decisão de Carreira: encontre a melhor IES
-                        </h1>
-                        
+
+                        <EncryptedText
+                            text="Decisão de Carreira: encontre a melhor IES"
+                            className="text-2xl md:text-3xl font-extrabold mb-6 text-center text-gray-900 dark:text-white"
+                            encryptedClassName="text-neutral-500"
+                            revealedClassName="dark:text-white text-black"
+                            revealDelayMs={50}
+                        />
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                            <Autocomplete 
+                            <Autocomplete
                                 color="primary"
-                                className="cursor-pointe" 
-                                value={estado} 
-                                onSelectionChange={(v) => setEstado(String(v))} 
+                                className="cursor-pointe"
+                                value={estado}
+                                onSelectionChange={(v) => setEstado(String(v))}
                                 label="Estado"
                                 placeholder="Selecione o Estado (UF)"
                             >
@@ -340,12 +344,12 @@ export default function Home() {
                                 ))}
                             </Autocomplete>
 
-                            <Autocomplete 
+                            <Autocomplete
                                 className="cursor-pointer"
-                                color="primary" 
-                                isLoading={loadingCidades} 
-                                isDisabled={loadingCidades} 
-                                onSelectionChange={(c) => setCidade(String(c))} 
+                                color="primary"
+                                isLoading={loadingCidades}
+                                isDisabled={loadingCidades}
+                                onSelectionChange={(c) => setCidade(String(c))}
                                 label="Cidade"
                                 selectedKey={cidade}
                                 placeholder={loadingCidades ? "Carregando cidades..." : "Selecione o Município"}
@@ -356,12 +360,12 @@ export default function Home() {
                                 ))}
                             </Autocomplete>
 
-                            <Autocomplete 
+                            <Autocomplete
                                 color="primary"
-                                className="cursor-pointer" 
-                                isLoading={loadingCursos} 
-                                isDisabled={loadingCursos || !cidade} 
-                                onSelectionChange={(c) => setCurso(String(c))} 
+                                className="cursor-pointer"
+                                isLoading={loadingCursos}
+                                isDisabled={loadingCursos || !cidade}
+                                onSelectionChange={(c) => setCurso(String(c))}
                                 label="Curso"
                                 selectedKey={curso}
                                 placeholder={!cidade ? "Selecione uma cidade primeiro" : loadingCursos ? "Buscando cursos..." : "Selecione o Curso"}
@@ -372,23 +376,23 @@ export default function Home() {
                                 ))}
                             </Autocomplete>
                         </div>
-                        
-                        <div className="flex gap-3 mt-6 flex-col md:flex-row">
-                            <Button 
+
+                        <div className="flex gap-3 mt-6 flex-col md:flex-row md:w-auto w-full justify-center">
+                            <Button
                                 color="success"
-                                size="md" 
-                                type="submit" 
+                                size="md"
+                                type="submit"
                                 variant="ghost"
                                 isLoading={loadingResultado}
                                 isDisabled={loadingResultado || !cidade || !curso}
                                 className="text-lg"
                                 startContent={!loadingResultado && <FaSearch />}
-                            > 
-                                
+                            >
+
                                 Buscar Ranking
                             </Button>
-                            <Button 
-                                type="reset" 
+                            <Button
+                                type="reset"
                                 variant="light"
                                 onClick={() => { setCidade(null); setCurso(null); setResultado(null); }}
                                 className="flex-1"
@@ -399,7 +403,7 @@ export default function Home() {
                         </div>
                     </Form>
                 </div>
-                
+
                 <Divider className="my-8" />
 
                 {/* 2. Área de Resultados (ABAIXO) */}
@@ -416,10 +420,10 @@ export default function Home() {
                     {resultado && !loadingResultado && (
                         <div className="w-full animate-in fade-in duration-500">
                             {rankingData.length > 0 ? (
-                                <RankingCardSpotlight 
-                                    ranking={rankingData} 
-                                    cursoNome={cursoNome} 
-                                    cidadeNome={nomeCidade} 
+                                <RankingCard
+                                    ranking={rankingData}
+                                    cursoNome={cursoNome}
+                                    cidadeNome={nomeCidade}
                                 />
                             ) : (
                                 <NoResults curso={curso} mensagemErro={mensagemErro} />

@@ -44,7 +44,7 @@ export default function RootLayout({
         )}
       >
         <Providers themeProps={{ attribute: "class", defaultTheme: "dark" }}>
-          <div className="relative flex flex-col h-full bg-gradient-to-br from-gray-50 via-blue-50 to-indigo-100 dark:from-indigo-950 dark:via-blue-900 dark:to-sky-950 min-h-screen transition-colors duration-500">
+          <div className="relative flex flex-col h-full bg-gradient-to-br from-blue-50 via-blue-200 to-indigo-300 dark:from-indigo-950 dark:via-blue-900 dark:to-sky-950 min-h-screen transition-colors duration-500">
             <Navbar />
             <main className="container mx-auto max-w-7xl pt-16 px-6 flex-grow">
               {children}
